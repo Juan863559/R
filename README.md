@@ -1,2 +1,10 @@
 # R
-Apuntes De Clase En Programacion Funcional =)
+Ingieneria En Computacion Inteligente 
+
+Maestro: Walter 
+Alumno:
+Juan Pablo Rodriguez Garcia 
+
+Programacion Funcional =)
+
+Apuntes De Clase
