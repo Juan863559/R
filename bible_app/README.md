@@ -1,16 +1,35 @@
-# bible_app
+# Santa Biblia - App en Flutter
 
-A new Flutter project.
+Esta es una aplicación de la Biblia desarrollada en Flutter con un diseño intuitivo y fácil de usar.
 
-## Getting Started
+## Características
 
-This project is a starting point for a Flutter application.
+- **Diseño Limpio**: Tema en azul bajito con fondo blanco para una lectura cómoda.
+- **Navegación Intuitiva**: Menú desplegable lateral (Drawer) dividido en Antiguo y Nuevo Testamento.
+- **Lista de Libros**: Todos los libros de la Biblia organizados y accesibles rápidamente.
+- **Favoritos**: Opción para marcar versículos como favoritos.
+- **Ajuste de Texto**: Botones para aumentar o disminuir el tamaño de la letra para mejor legibilidad.
+- **Tipografía**: Fuente tipo Arial para claridad.
 
-A few resources to get you started if this is your first Flutter project:
+## Cómo empezar
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Si ya tienes Flutter instalado en tu computadora, sigue estos pasos para ejecutar el proyecto:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. **Descarga y Extrae**: Si descargaste el proyecto como ZIP, extráelo en la carpeta donde guardas tus proyectos de Flutter.
+2. **Navega a la carpeta**: Abre una terminal en la carpeta `bible_app`.
+3. **Instala dependencias**:
+   ```bash
+   flutter pub get
+   ```
+4. **Ejecuta la app**:
+   ```bash
+   flutter run
+   ```
+
+## Estructura del Proyecto
+
+- `lib/main.dart`: Contiene la lógica principal de la interfaz y el estado de la aplicación.
+- `lib/bible_data.dart`: Contiene la lista de libros del Antiguo y Nuevo Testamento.
+
+---
+Desarrollado para Juan Pablo Rodriguez Garcia.
