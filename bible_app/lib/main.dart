@@ -26,9 +26,9 @@ class _BibleAppState extends State<BibleApp> {
     });
   }
 
-  void _changeFontSize(double delta) {
+  void _changeFontSize(double newSize) {
     setState(() {
-      _fontSize = (_fontSize + delta).clamp(12.0, 40.0);
+      _fontSize = newSize.clamp(12.0, 40.0);
     });
   }
 
@@ -36,14 +36,33 @@ class _BibleAppState extends State<BibleApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Santa Biblia',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.lightBlue,
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Arial', // Fallback to system sans-serif if not found
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.lightBlue,
+          primary: const Color(0xFF0288D1),
+          surface: Colors.white,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF5F9FF), // Very light blue-grey
+        fontFamily: 'Arial',
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFB3E5FC), // Light Blue 100
-          foregroundColor: Colors.black87,
+          backgroundColor: Color(0xFFE1F5FE),
+          foregroundColor: Color(0xFF01579B),
           elevation: 0,
+          centerTitle: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20),
+            ),
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
         ),
       ),
       home: BibleHomePage(
@@ -84,19 +103,65 @@ class _BibleHomePageState extends State<BibleHomePage> {
     Navigator.pop(context); // Close drawer
   }
 
+  void _showFontSizeDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24.0),
+              height: 200,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'Tamaño de letra',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const Icon(Icons.text_fields, size: 16),
+                      Expanded(
+                        child: Slider(
+                          value: widget.fontSize,
+                          min: 12,
+                          max: 40,
+                          onChanged: (value) {
+                            setModalState(() {
+                              widget.onChangeFontSize(value);
+                            });
+                          },
+                        ),
+                      ),
+                      const Icon(Icons.text_fields, size: 32),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_selectedBook.name),
+        title: Text(
+          _selectedBook.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.text_decrease),
-            onPressed: () => widget.onChangeFontSize(-2),
-          ),
-          IconButton(
-            icon: const Icon(Icons.text_increase),
-            onPressed: () => widget.onChangeFontSize(2),
+            icon: const Icon(Icons.format_size),
+            onPressed: _showFontSizeDialog,
           ),
         ],
       ),
@@ -104,50 +169,65 @@ class _BibleHomePageState extends State<BibleHomePage> {
         onBookSelected: _selectBook,
         selectedBook: _selectedBook,
       ),
-      body: Container(
-        color: Colors.white,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: 20, // Mocking 20 verses per book for now
-          itemBuilder: (context, index) {
-            final verseNumber = index + 1;
-            final verseKey = '${_selectedBook.name} $verseNumber';
-            final isFavorite = widget.favorites.contains(verseKey);
+      body: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+        itemCount: 20,
+        itemBuilder: (context, index) {
+          final verseNumber = index + 1;
+          final verseKey = '${_selectedBook.name} $verseNumber';
+          final isFavorite = widget.favorites.contains(verseKey);
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '$verseNumber ',
-                    style: TextStyle(
-                      fontSize: widget.fontSize * 0.8,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.lightBlue[700],
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE1F5FE),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Versículo $verseNumber',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0288D1),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.grey,
+                            size: 20,
+                          ),
+                          onPressed: () => widget.onToggleFavorite(verseKey),
+                        ),
+                      ],
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Este es un versículo de ejemplo para el libro de ${_selectedBook.name}. Aquí se mostraría el texto sagrado correspondiente.',
+                    const SizedBox(height: 8),
+                    Text(
+                      'Este es un versículo de ejemplo para el libro de ${_selectedBook.name}. El texto sagrado fluye aquí con elegancia y claridad, permitiendo una lectura amena y espiritual.',
                       style: TextStyle(
                         fontSize: widget.fontSize,
                         color: Colors.black87,
+                        height: 1.5,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.grey,
-                    ),
-                    onPressed: () => widget.onToggleFavorite(verseKey),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -166,55 +246,93 @@ class BibleDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color(0xFFB3E5FC),
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFE1F5FE), Color(0xFFB3E5FC)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
             child: Center(
-              child: Text(
-                'Santa Biblia',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.auto_stories, size: 40, color: Colors.lightBlue[800]),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Santa Biblia',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.lightBlue[900],
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           Expanded(
             child: ListView(
+              padding: EdgeInsets.zero,
               children: [
-                ExpansionTile(
-                  leading: const Icon(Icons.book, color: Colors.lightBlue),
-                  title: const Text('Antiguo Testamento'),
-                  initiallyExpanded: selectedBook.testament == 'Antiguo',
-                  children: oldTestamentBooks.map((book) {
-                    return ListTile(
-                      title: Text(book.name),
-                      selected: selectedBook.name == book.name,
-                      onTap: () => onBookSelected(book),
-                    );
-                  }).toList(),
+                _buildTestamentSection(
+                  context,
+                  title: 'Antiguo Testamento',
+                  icon: Icons.history_edu,
+                  books: oldTestamentBooks,
+                  isAntiguo: true,
                 ),
-                ExpansionTile(
-                  leading: const Icon(Icons.menu_book, color: Colors.lightBlue),
-                  title: const Text('Nuevo Testamento'),
-                  initiallyExpanded: selectedBook.testament == 'Nuevo',
-                  children: newTestamentBooks.map((book) {
-                    return ListTile(
-                      title: Text(book.name),
-                      selected: selectedBook.name == book.name,
-                      onTap: () => onBookSelected(book),
-                    );
-                  }).toList(),
+                const Divider(height: 1),
+                _buildTestamentSection(
+                  context,
+                  title: 'Nuevo Testamento',
+                  icon: Icons.menu_book,
+                  books: newTestamentBooks,
+                  isAntiguo: false,
                 ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTestamentSection(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<BibleBook> books,
+    required bool isAntiguo,
+  }) {
+    return ExpansionTile(
+      leading: Icon(icon, color: const Color(0xFF0288D1)),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+      ),
+      initiallyExpanded: selectedBook.testament == (isAntiguo ? 'Antiguo' : 'Nuevo'),
+      children: books.map((book) {
+        final isSelected = selectedBook.name == book.name;
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 32),
+          title: Text(
+            book.name,
+            style: TextStyle(
+              color: isSelected ? const Color(0xFF0288D1) : Colors.black87,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          trailing: isSelected ? const Icon(Icons.check_circle, size: 18, color: Color(0xFF0288D1)) : null,
+          selected: isSelected,
+          onTap: () => onBookSelected(book),
+        );
+      }).toList(),
     );
   }
 }

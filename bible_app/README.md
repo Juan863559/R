@@ -30,6 +30,3 @@ Si ya tienes Flutter instalado en tu computadora, sigue estos pasos para ejecuta
 
 - `lib/main.dart`: Contiene la lógica principal de la interfaz y el estado de la aplicación.
 - `lib/bible_data.dart`: Contiene la lista de libros del Antiguo y Nuevo Testamento.
-
----
-Desarrollado para Juan Pablo Rodriguez Garcia.
