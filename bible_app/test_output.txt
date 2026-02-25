@@ -1,13 +1,0 @@
-Resolving dependencies...
-Downloading packages...
-  characters 1.4.0 (1.4.1 available)
-  matcher 0.12.17 (0.12.18 available)
-  material_color_utilities 0.11.1 (0.13.0 available)
-  meta 1.17.0 (1.18.1 available)
-  test_api 0.7.7 (0.7.9 available)
-Got dependencies!
-5 packages have newer versions incompatible with dependency constraints.
-Try `flutter pub outdated` for more information.
-00:00 +0: loading /app/bible_app/test/widget_test.dart                                                                                                                                                 00:01 +0: loading /app/bible_app/test/widget_test.dart                                                                                                                                                 00:02 +0: loading /app/bible_app/test/widget_test.dart                                                                                                                                                 00:02 +0: Bible app smoke test                                                                                                                                                                         00:03 +0: Bible app smoke test                                                                                                                                                                         00:03 +0: Bible app smoke test
-Intentando cargar assets/biblia/biblia_completa.json...
-00:03 +1: Bible app smoke test                                                                                                                                                                         00:03 +1: All tests passed!

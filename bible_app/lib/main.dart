@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'bible_data.dart';
@@ -137,21 +138,29 @@ class _BibleHomePageState extends State<BibleHomePage> {
       _errorMessage = null;
     });
     try {
-      debugPrint('Intentando cargar assets/biblia/biblia_completa.json...');
-      final String response = await rootBundle.loadString('assets/biblia/biblia_completa.json');
-      debugPrint('Archivo cargado, decodificando JSON...');
-      final data = json.decode(response);
-      setState(() {
-        _fullBibleData = data;
-        _isLoading = false;
-      });
-      debugPrint('Biblia cargada exitosamente. Total de libros: ${_fullBibleData?.length}');
+      debugPrint('Iniciando carga de la Biblia completa...');
+      // Usamos compute para decodificar el JSON en otro hilo si es posible,
+      // pero rootBundle.loadString ya es asíncrono.
+      final String jsonString = await rootBundle.loadString('assets/biblia/biblia_completa.json');
+
+      // Decodificación en un hilo separado para evitar bloqueos en la UI (Isolate)
+      final data = await compute(jsonDecode, jsonString);
+
+      if (data is List) {
+        setState(() {
+          _fullBibleData = data;
+          _isLoading = false;
+        });
+        debugPrint('Biblia cargada: ${data.length} libros encontrados.');
+      } else {
+        throw Exception('El formato del JSON no es una lista válida.');
+      }
     } catch (e) {
-      debugPrint('Error cargando la biblia: $e');
+      debugPrint('Error detallado cargando la biblia: $e');
       setState(() {
         _fullBibleData = null;
         _isLoading = false;
-        _errorMessage = 'No se pudo cargar el texto de la Biblia. Asegúrate de que el archivo assets/biblia/biblia_completa.json existe y está registrado en pubspec.yaml.';
+        _errorMessage = 'Error al cargar los versículos reales. Por favor, asegúrate de haber descargado la última versión del código y que el archivo "assets/biblia/biblia_completa.json" esté presente.';
       });
     }
   }
@@ -274,19 +283,39 @@ class _BibleHomePageState extends State<BibleHomePage> {
             _buildChapterSelector(),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text('Cargando Palabra Sagrada...'),
+                        ],
+                      ),
+                    )
                   : _errorMessage != null
                       ? Center(
                           child: Padding(
-                            padding: const EdgeInsets.all(24.0),
+                            padding: const EdgeInsets.all(32.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.error_outline, size: 60, color: Colors.red),
-                                const SizedBox(height: 16),
-                                Text(_errorMessage!, textAlign: TextAlign.center),
-                                const SizedBox(height: 16),
-                                ElevatedButton(onPressed: _loadBibleData, child: const Text('Reintentar'))
+                                const Icon(Icons.warning_amber_rounded, size: 80, color: Colors.orange),
+                                const SizedBox(height: 24),
+                                Text(
+                                  _errorMessage!,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: _loadBibleData,
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Intentar de nuevo'),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -311,6 +340,8 @@ class _BibleHomePageState extends State<BibleHomePage> {
 
   Widget _buildChapterSelector() {
     final chapterCount = _getChapterCount();
+    if (chapterCount == 0 && !_isLoading) return const SizedBox.shrink();
+
     return SizedBox(
       height: 60,
       child: ListView.builder(
@@ -354,15 +385,13 @@ class _BibleHomePageState extends State<BibleHomePage> {
   }
 
   String _getVerseText(int verseNumber) {
-    if (_fullBibleData == null) {
-      return 'Cargando...';
-    }
+    if (_fullBibleData == null) return '';
     final bookData = _getSelectedBookData();
-    if (bookData == null) return 'Error al cargar datos del libro.';
+    if (bookData == null) return '';
     final chapters = bookData['chapters'] as List;
-    if (_selectedChapter > chapters.length) return 'Capítulo no encontrado.';
+    if (_selectedChapter > chapters.length) return '';
     final chapterData = chapters[_selectedChapter - 1] as List;
-    if (verseNumber > chapterData.length) return 'Versículo no encontrado.';
+    if (verseNumber > chapterData.length) return '';
     return chapterData[verseNumber - 1];
   }
 
