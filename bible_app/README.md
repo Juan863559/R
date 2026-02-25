@@ -30,3 +30,11 @@ Si ya tienes Flutter instalado en tu computadora, sigue estos pasos para ejecuta
 
 - `lib/main.dart`: Contiene la lógica principal de la interfaz y el estado de la aplicación.
 - `lib/bible_data.dart`: Contiene la lista de libros del Antiguo y Nuevo Testamento.
+- `assets/biblia/`: Carpeta donde debes colocar los archivos JSON de la Biblia.
+
+## Cómo agregar la Biblia completa
+
+He preparado la aplicación para que sea escalable. Para agregar la Biblia completa:
+1. Coloca tus archivos JSON en la carpeta `assets/biblia/`.
+2. Asegúrate de que el formato coincida con el ejemplo en `assets/biblia/genesis.json`.
+3. La aplicación detectará automáticamente los nuevos archivos si actualizas el cargador de datos en `main.dart`.

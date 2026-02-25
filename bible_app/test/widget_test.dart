@@ -14,8 +14,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-    // Verify that the drawer shows "Antiguo Testamento".
-    expect(find.text('Antiguo Testamento'), findsOneWidget);
+    // Verify that the drawer shows "ANTIGUO TESTAMENTO".
+    expect(find.text('ANTIGUO TESTAMENTO'), findsOneWidget);
 
     // Check that we can see books in the drawer
     expect(find.text('Éxodo'), findsOneWidget);

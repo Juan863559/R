@@ -1,0 +1,28 @@
+total 32
+drwxr-xr-x   1 root  root  4096 Feb 24 22:14 .
+drwxr-xr-x   1 root  root  4096 Feb 24 22:14 ..
+drwxr-xr-x   4 jules root  4096 Feb 24 23:40 app
+lrwxrwxrwx   1 root  root     7 Apr 22  2024 bin -> usr/bin
+drwxr-xr-x   2 root  root     3 Jul 10  2025 bin.usr-is-merged
+drwxr-xr-x   2 root  root     3 Apr 22  2024 boot
+drwxr-xr-x  12 root  root  2720 Jan 18 08:55 dev
+drwxr-xr-x   1 root  root  4096 Jan 18 08:55 etc
+drwxrwxrwx   4 jules jules   37 Jan 16 17:31 go
+drwxr-xr-x   1 root  root  4096 Jan 18 06:06 home
+lrwxrwxrwx   1 root  root     7 Apr 22  2024 lib -> usr/lib
+drwxr-xr-x   2 root  root     3 Nov 14  2024 lib.usr-is-merged
+lrwxrwxrwx   1 root  root     9 Apr 22  2024 lib64 -> usr/lib64
+drwxr-xr-x   2 root  root     3 Jan 13 02:04 media
+drwxr-xr-x   2 root  root     3 Jan 13 02:04 mnt
+drwxr-xr-x   1 root  root  4096 Jan 18 08:55 opt
+dr-xr-xr-x 147 root  root     0 Jan 18 08:55 proc
+drwxr-xr-x  27 root  root   348 Jan  1  1970 rom
+drwxr-xr-x  13 root  root   190 Jan 18 06:01 root
+drwxr-xr-x  17 root  root   500 Feb 24 23:20 run
+lrwxrwxrwx   1 root  root     8 Apr 22  2024 sbin -> usr/sbin
+drwxr-xr-x   2 root  root     3 Jul 10  2025 sbin.usr-is-merged
+drwxr-xr-x   2 root  root     3 Jan 13 02:04 srv
+dr-xr-xr-x  12 root  root     0 Feb 24 23:40 sys
+drwxrwxrwt   1 root  root  4096 Feb 24 23:39 tmp
+drwxr-xr-x  12 root  root   142 Jan 18 06:01 usr
+drwxr-xr-x   1 root  root  4096 Jan 18 08:55 var
