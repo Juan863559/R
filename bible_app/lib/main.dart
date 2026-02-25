@@ -121,6 +121,7 @@ class _BibleHomePageState extends State<BibleHomePage> {
   int _selectedChapter = 1;
   List<dynamic>? _fullBibleData;
   bool _isLoading = true;
+  String? _errorMessage;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
 
@@ -131,22 +132,26 @@ class _BibleHomePageState extends State<BibleHomePage> {
   }
 
   Future<void> _loadBibleData() async {
-    if (_fullBibleData != null) {
-      setState(() => _isLoading = false);
-      return;
-    }
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
     try {
+      debugPrint('Intentando cargar assets/biblia/biblia_completa.json...');
       final String response = await rootBundle.loadString('assets/biblia/biblia_completa.json');
-      final data = await json.decode(response);
+      debugPrint('Archivo cargado, decodificando JSON...');
+      final data = json.decode(response);
       setState(() {
         _fullBibleData = data;
         _isLoading = false;
       });
+      debugPrint('Biblia cargada exitosamente. Total de libros: ${_fullBibleData?.length}');
     } catch (e) {
+      debugPrint('Error cargando la biblia: $e');
       setState(() {
         _fullBibleData = null;
         _isLoading = false;
+        _errorMessage = 'No se pudo cargar el texto de la Biblia. Asegúrate de que el archivo assets/biblia/biblia_completa.json existe y está registrado en pubspec.yaml.';
       });
     }
   }
@@ -270,17 +275,33 @@ class _BibleHomePageState extends State<BibleHomePage> {
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      itemCount: _getVerseCount(),
-                      itemBuilder: (context, index) {
-                        final verseNumber = index + 1;
-                        final verseKey = '${_selectedBook.name} $_selectedChapter:$verseNumber';
-                        final isFavorite = widget.favorites.contains(verseKey);
+                  : _errorMessage != null
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                                const SizedBox(height: 16),
+                                Text(_errorMessage!, textAlign: TextAlign.center),
+                                const SizedBox(height: 16),
+                                ElevatedButton(onPressed: _loadBibleData, child: const Text('Reintentar'))
+                              ],
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          itemCount: _getVerseCount(),
+                          itemBuilder: (context, index) {
+                            final verseNumber = index + 1;
+                            final verseKey = '${_selectedBook.name} $_selectedChapter:$verseNumber';
+                            final isFavorite = widget.favorites.contains(verseKey);
 
-                        return _buildVerseCard(verseNumber, verseKey, isFavorite, _getVerseText(verseNumber));
-                      },
-                    ),
+                            return _buildVerseCard(verseNumber, verseKey, isFavorite, _getVerseText(verseNumber));
+                          },
+                        ),
             ),
           ],
         ),
@@ -324,7 +345,7 @@ class _BibleHomePageState extends State<BibleHomePage> {
   }
 
   int _getVerseCount() {
-    if (_fullBibleData == null) return 20;
+    if (_fullBibleData == null) return 0;
     final bookData = _getSelectedBookData();
     if (bookData == null) return 0;
     final chapters = bookData['chapters'] as List;
@@ -334,23 +355,23 @@ class _BibleHomePageState extends State<BibleHomePage> {
 
   String _getVerseText(int verseNumber) {
     if (_fullBibleData == null) {
-      return 'Este es un versículo de ejemplo para el libro de ${_selectedBook.name}. El texto sagrado fluye aquí con elegancia y claridad.';
+      return 'Cargando...';
     }
     final bookData = _getSelectedBookData();
-    if (bookData == null) return 'Error al cargar datos.';
+    if (bookData == null) return 'Error al cargar datos del libro.';
     final chapters = bookData['chapters'] as List;
+    if (_selectedChapter > chapters.length) return 'Capítulo no encontrado.';
     final chapterData = chapters[_selectedChapter - 1] as List;
+    if (verseNumber > chapterData.length) return 'Versículo no encontrado.';
     return chapterData[verseNumber - 1];
   }
 
   dynamic _getSelectedBookData() {
     if (_fullBibleData == null) return null;
-    // Buscamos el libro por índice o por nombre si fuera necesario.
-    // En bible_data.dart, los libros están en el orden estándar.
     int index = oldTestamentBooks.indexWhere((b) => b.name == _selectedBook.name);
     if (index == -1) {
       index = newTestamentBooks.indexWhere((b) => b.name == _selectedBook.name);
-      if (index != -1) index += 39; // Offset de libros del AT
+      if (index != -1) index += 39;
     }
     if (index != -1 && index < _fullBibleData!.length) {
       return _fullBibleData![index];
@@ -359,7 +380,7 @@ class _BibleHomePageState extends State<BibleHomePage> {
   }
 
   int _getChapterCount() {
-    if (_fullBibleData == null) return 50;
+    if (_fullBibleData == null) return 0;
     final bookData = _getSelectedBookData();
     if (bookData == null) return 0;
     return (bookData['chapters'] as List).length;

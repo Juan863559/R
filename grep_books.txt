@@ -1,0 +1,5 @@
+"abbrev": "gn"
+"abbrev": "ex"
+"abbrev": "lv"
+"abbrev": "nm"
+"abbrev": "dt"
