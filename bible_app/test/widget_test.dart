@@ -11,8 +11,10 @@ void main() {
     expect(find.text('Génesis'), findsOneWidget);
 
     // Open the drawer using the leading icon.
+    // We use pump() instead of pumpAndSettle because of the CircularProgressIndicator animation
     await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Verify that the drawer shows "ANTIGUO TESTAMENTO".
     expect(find.text('ANTIGUO TESTAMENTO'), findsOneWidget);

@@ -1,2 +1,0 @@
-./bible_app/test/widget_test.dart:    expect(find.text('Génesis'), findsOneWidget);
-./bible_app/lib/bible_data.dart:  BibleBook(name: 'Génesis', testament: 'Antiguo'),

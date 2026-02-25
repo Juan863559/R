@@ -119,8 +119,8 @@ class BibleHomePage extends StatefulWidget {
 class _BibleHomePageState extends State<BibleHomePage> {
   BibleBook _selectedBook = oldTestamentBooks[0];
   int _selectedChapter = 1;
-  Map<String, dynamic>? _bibleData;
-  bool _isLoading = false;
+  List<dynamic>? _fullBibleData;
+  bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
 
@@ -131,19 +131,21 @@ class _BibleHomePageState extends State<BibleHomePage> {
   }
 
   Future<void> _loadBibleData() async {
+    if (_fullBibleData != null) {
+      setState(() => _isLoading = false);
+      return;
+    }
     setState(() => _isLoading = true);
     try {
-      // Intentamos cargar el archivo JSON del libro seleccionado
-      final String response = await rootBundle.loadString('assets/biblia/${_selectedBook.name.toLowerCase().replaceAll(' ', '_')}.json');
+      final String response = await rootBundle.loadString('assets/biblia/biblia_completa.json');
       final data = await json.decode(response);
       setState(() {
-        _bibleData = data;
+        _fullBibleData = data;
         _isLoading = false;
       });
     } catch (e) {
-      // Si falla (por ejemplo, el archivo no existe), mostramos datos de ejemplo
       setState(() {
-        _bibleData = null;
+        _fullBibleData = null;
         _isLoading = false;
       });
     }
@@ -154,7 +156,6 @@ class _BibleHomePageState extends State<BibleHomePage> {
       _selectedBook = book;
       _selectedChapter = 1;
     });
-    _loadBibleData();
     Navigator.pop(context);
   }
 
@@ -288,12 +289,13 @@ class _BibleHomePageState extends State<BibleHomePage> {
   }
 
   Widget _buildChapterSelector() {
+    final chapterCount = _getChapterCount();
     return SizedBox(
       height: 60,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 50,
+        itemCount: chapterCount,
         itemBuilder: (context, index) {
           final chapter = index + 1;
           final isSelected = _selectedChapter == chapter;
@@ -322,20 +324,45 @@ class _BibleHomePageState extends State<BibleHomePage> {
   }
 
   int _getVerseCount() {
-    if (_bibleData == null) return 20; // Mock count
-    final chapters = _bibleData!['chapters'] as List;
+    if (_fullBibleData == null) return 20;
+    final bookData = _getSelectedBookData();
+    if (bookData == null) return 0;
+    final chapters = bookData['chapters'] as List;
     if (_selectedChapter > chapters.length) return 0;
-    final chapterData = chapters[_selectedChapter - 1];
-    return (chapterData['verses'] as List).length;
+    return (chapters[_selectedChapter - 1] as List).length;
   }
 
   String _getVerseText(int verseNumber) {
-    if (_bibleData == null) {
+    if (_fullBibleData == null) {
       return 'Este es un versículo de ejemplo para el libro de ${_selectedBook.name}. El texto sagrado fluye aquí con elegancia y claridad.';
     }
-    final chapters = _bibleData!['chapters'] as List;
-    final chapterData = chapters[_selectedChapter - 1];
-    return chapterData['verses'][verseNumber - 1];
+    final bookData = _getSelectedBookData();
+    if (bookData == null) return 'Error al cargar datos.';
+    final chapters = bookData['chapters'] as List;
+    final chapterData = chapters[_selectedChapter - 1] as List;
+    return chapterData[verseNumber - 1];
+  }
+
+  dynamic _getSelectedBookData() {
+    if (_fullBibleData == null) return null;
+    // Buscamos el libro por índice o por nombre si fuera necesario.
+    // En bible_data.dart, los libros están en el orden estándar.
+    int index = oldTestamentBooks.indexWhere((b) => b.name == _selectedBook.name);
+    if (index == -1) {
+      index = newTestamentBooks.indexWhere((b) => b.name == _selectedBook.name);
+      if (index != -1) index += 39; // Offset de libros del AT
+    }
+    if (index != -1 && index < _fullBibleData!.length) {
+      return _fullBibleData![index];
+    }
+    return null;
+  }
+
+  int _getChapterCount() {
+    if (_fullBibleData == null) return 50;
+    final bookData = _getSelectedBookData();
+    if (bookData == null) return 0;
+    return (bookData['chapters'] as List).length;
   }
 
   Widget _buildVerseCard(int verseNumber, String verseKey, bool isFavorite, String text) {

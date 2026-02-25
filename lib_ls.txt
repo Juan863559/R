@@ -1,3 +1,0 @@
-bible_app/lib:
-bible_data.dart
-main.dart
